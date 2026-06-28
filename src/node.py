@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Callable
 
-class Node:
+class Perceptron_Node:
 
     def __init__(self, input_count: int, weights: np.ndarray[tuple[int], np.dtype[np.float64]], activation_function: Callable[[np.float64], np.float64]) -> None:
         """Initialize a node with weights and an activation function.
@@ -19,8 +19,11 @@ class Node:
         # size of w must be equal to the number of inputs (plus one for bias)
         if len(weights) != input_count + 1:
             raise ValueError("Length of weights must be one more than the number of inputs")
-        self.w = weights
+        self.weights = weights
         self.phi = activation_function
+
+    def set_weights(self, weights: np.ndarray) -> None:
+        self.weights = weights
 
     def calculate(self, inputs: np.ndarray[tuple[int], np.dtype[np.float64]]) -> np.float64:
         """Compute the node output for a given input vector.
@@ -38,5 +41,5 @@ class Node:
         if len(inputs) != self.input_count:
             raise ValueError("Number of inputs must equal node's input count")
         
-        a = self.w[0] + inputs * self.w[1:]
+        a = self.weights[0] + np.dot(inputs, self.weights[1:])
         return self.phi(a)
