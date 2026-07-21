@@ -1,47 +1,60 @@
 from matplotlib import rcParams
 import matplotlib.pyplot as plt
 import numpy as np
-from node import Perceptron_Node as PN
+from node import Node
+from output_node import Output_Node
 
-"""
-Error function:
-E = sum((y-z) ** 2)
-"""
 
-def d0(ys: np.ndarray, zs: np.ndarray) -> float:
-    return -2 * np.sum(ys - zs)
+def mean_squared_error_derivative(y: float, y_target: float) -> float:
+    """
+    Partial derivative of the following error function wrt y
+    Error function:
+    E = (y-y_target) ** 2
+    """
+    return 2 * (y - y_target)
 
-def d1(xs: np.ndarray, ys: np.ndarray, zs: np.ndarray) -> float:
-    return -2 * np.sum(xs * (ys-zs))
+def simple_single_node_test(epochs = 100000, epsilon = 0.01, gradient = 2, intercept = 0.1) -> None:
+    """Train a single output node to fit a linear function.
 
-def gradient_descent (node: PN, xs: np.ndarray, ys: np.ndarray, eta: float = 1e-2, iters: int = 10000) -> None:
-    for i in range(iters):
-        zs = np.array([node.calculate(np.array([xs[i]])) for i in range(len(xs))])
-        d = np.array([d0(ys, zs), d1(xs, ys, zs)])
-        node.set_weights(node.weights - eta * d)
+    The function uses a simple gradient descent loop over randomly selected
+    training samples from a line defined by the supplied slope and intercept.
+    The node uses a linear activation and mean squared error, so the update
+    rule is derived directly from the error gradient.
 
-def linear_regression(xs: np.ndarray, ys: np.ndarray) -> None:
+    Args:
+        epochs: Number of training iterations to run.
+        epsilon: Learning rate used for gradient descent.
+        gradient: Slope of the target linear function.
+        intercept: Intercept of the target linear function.
+    """
 
-    n = PN(1, np.array([0, 0]), lambda x: x)
+    xs = np.arange(0, 1, 0.1)
+    ys = gradient * xs + intercept
+    samples = np.transpose([xs, ys])
 
-    gradient_descent (n, xs, ys)
+    node = Output_Node(lambda x: x, lambda _: 1, mean_squared_error_derivative)
+    w = np.full(2, 1.)
 
-    z = np.array([n.calculate(np.array([x])) for x in xs])
-    print("Weights: "+ str(n.weights))
-    print("Derivatives: " + str([d0(ys, z), d1(xs, ys, z)]))
+    training_indices = np.random.choice(len(xs), epochs)
+
+    for sample in samples[training_indices]:
+        x = sample[0]
+        y_target = sample[1]
+        node.calculate(np.array([x]), w)
+        delta = node.calc_output_node_gradient(y_target)
+
+        bias_gradient = delta # * 1
+        w1_gradient = delta * x
+        w -= epsilon * np.array([bias_gradient, w1_gradient])
 
     plt.scatter(xs, ys)
-
-    x2 = np.arange(min(xs), max(xs), (max(xs)-min(xs)) / 100)
-    zs = np.array([n.calculate(np.array([x])) for x in x2])
-    plt.scatter(x2, zs, s=rcParams['lines.markersize'] ** 2 / 5)
+    test_xs = np.arange(-1, 2, 0.02)
+    test_ys = np.array([node.calculate(np.array([x]), w) for x in test_xs])
+    plt.scatter(test_xs, test_ys, s=5)
     plt.show()
 
 def main():
-    xs = np.arange(0, 1, 0.1)
-    ys = 2* xs + 0.2
-
-    linear_regression(xs, ys)
+    simple_single_node_test()
 
 if __name__ == "__main__":
     main()
