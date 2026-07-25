@@ -13,8 +13,6 @@ class Network:
     input_count: int
     inputs: np.ndarray
 
-    x = 0
-
     def __init__(self, input_count: int, layer_sizes: list[int], activation_functions: list[Callable[[float], float]],
                  activation_derivatives: list[Callable[[float], float]]) -> None:
         """Initialize the network and its weight matrices.
@@ -66,10 +64,6 @@ class Network:
             eta: Learning rate.
             output_derivatives: Error derivatives at the network output.
         """
-
-        self.x += 1
-        if self.x == 1000:
-            pass
 
         dels = self.output_layer.calc_output_gradients(output_derivatives)
         for i in range(len(self.layers) - 2, -1, -1):
