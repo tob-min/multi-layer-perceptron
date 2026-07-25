@@ -1,4 +1,3 @@
-from matplotlib import rcParams
 import matplotlib.pyplot as plt
 import numpy as np
 from node import Node
