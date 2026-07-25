@@ -1,8 +1,14 @@
+from pathlib import Path
+import sys
+from typing import Callable
+
 import matplotlib.pyplot as plt
 import numpy as np
-from node import Node
+
+sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
+
+from network import Network
 from output_node import Output_Node
-from typing import Callable
 
 def mean_squared_error_derivative(y: float, y_target: float) -> float:
     """Return the derivative of the mean squared error with respect to the prediction."""
@@ -74,8 +80,59 @@ def single_node_test(f: Callable[[np.ndarray], np.ndarray] = lambda xs: 2*xs + 0
     else:
         plt.show()
 
+def quartic_network_test(
+    xs: np.ndarray = np.linspace(-2, 2, 200),
+    epochs: int = 2000,
+    learning_rate: float = 0.01,
+    output_file: str | None = None,
+) -> None:
+    """Train a small network to fit a quartic function and plot the result."""
+    xs = np.asarray(xs, dtype=float)
+    ys = xs ** 4 - 2 * xs ** 2 + 0.5 * xs + 0.3
+
+    def tanh(x: float) -> float:
+        return np.tanh(x)
+
+    def tanh_derivative(x: float) -> float:
+        return 1 - np.tanh(x) ** 2
+
+    def mse_derivative(y: np.ndarray, y_target: float) -> float:
+        return mean_squared_error_derivative(y[0], y_target)
+
+    network = Network(
+        input_count=1,
+        layer_sizes=[8, 1],
+        activation_functions=[tanh, lambda x: x],
+        activation_derivatives=[tanh_derivative, lambda _: 1],
+    )
+
+    for _ in range(epochs):
+        i = np.random.choice(len(xs))
+        predictions = network.forward(xs[i:i+1])
+        error_derivative = np.array([2 * (predictions[0] - ys[i])])
+        network.backprop(learning_rate, error_derivative)
+
+    x_test = np.linspace(-2.2, 2.2, 300)
+    predictions = np.array([network.forward(np.array([x])) for x in x_test])
+
+    plt.clf()
+    plt.scatter(xs, ys, s=8, label="quartic samples")
+    plt.plot(x_test, predictions, color="tab:red", linewidth=2, label="network fit")
+    plt.title("Network fit to a quartic function")
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.legend()
+
+    if output_file:
+        plt.savefig(output_file)
+    else:
+        plt.show()
+
+
 def main():
     single_node_test(output_file="./graphs/linear.jpg")
+    quartic_network_test(output_file="./graphs/quartic_network.jpg", epochs=50000, learning_rate=0.005)
+
 
 if __name__ == "__main__":
     main()
