@@ -27,4 +27,5 @@ class Output_Layer(Layer):
         Returns:
             Element-wise gradients for the output layer.
         """
-        return np.array([node.activation_prime(node.weighted_sum) for node in self.nodes]) * error_derivatives
+        self.dels = np.array([node.activation_prime(node.weighted_sum) for node in self.nodes]) * error_derivatives
+        return self.dels

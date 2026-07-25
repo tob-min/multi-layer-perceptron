@@ -32,7 +32,7 @@ class Layer:
         Returns:
             An array of outputs from each node in the layer.
         """
-        self.outputs = np.array([node.calculate(inputs, weights[i]) for i, node in enumerate(self.nodes)])
+        self.outputs = np.array([node.calculate(inputs, weights[:, i]) for i, node in enumerate(self.nodes)])
         return np.array(self.outputs)
 
     def calc_gradients(self, output_weights: np.ndarray, output_dels: np.ndarray) -> np.ndarray:
@@ -45,7 +45,7 @@ class Layer:
         Returns:
             An array of gradients for each node in the layer.
         """
-        self.dels = np.array([node.calc_gradient(output_weights[i], output_dels) for i, node in enumerate(self.nodes)])
+        self.dels = np.array([node.calc_gradient(output_weights[i+1, :], output_dels) for i, node in enumerate(self.nodes)])
         return np.array(self.dels)
 
     def node_count(self) -> int:

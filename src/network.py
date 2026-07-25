@@ -13,9 +13,10 @@ class Network:
     input_count: int
     inputs: np.ndarray
 
+    x = 0
+
     def __init__(self, input_count: int, layer_sizes: list[int], activation_functions: list[Callable[[float], float]],
-                 activation_derivatives: list[Callable[[float], float]],
-                 error_derivatives: list[Callable[[np.ndarray, float], float]]) -> None:
+                 activation_derivatives: list[Callable[[float], float]]) -> None:
         """Initialize the network and its weight matrices.
 
         Args:
@@ -35,23 +36,23 @@ class Network:
         if not (len(layer_sizes) == len(activation_functions) and len(layer_sizes) == len(activation_derivatives)):
             raise ValueError("layer_sizes, activation_functions, and activation_derivatives must have the same size")
 
-        if len(error_derivatives) != layer_sizes[-1]:
-            raise ValueError("There must be an error derivative for each output node")
-
         self.input_count = input_count
-        self.weight_matrices = [np.full((input_count, layer_sizes[0]), 1 / input_count)]
+        self.weight_matrices = [np.random.uniform(0, 1, size=(input_count+1, layer_sizes[0]))]
         self.layers = []
 
         for i in range(len(layer_sizes) - 1):
             self.layers.append(Layer(layer_sizes[i], activation_functions[i], activation_derivatives[i]))
             # initialise each weight matrix to equally weight all inputs
-            self.weight_matrices.append(np.full((layer_sizes[i], layer_sizes[i + 1]), 1 / layer_sizes[i]))
+            self.weight_matrices.append(np.random.uniform(0, 1, (layer_sizes[i] + 1, layer_sizes[i + 1])))
 
         self.output_layer = Output_Layer(layer_sizes[-1], activation_functions[-1], activation_derivatives[-1])
         self.layers.append(self.output_layer)
 
     def forward(self, inputs: np.ndarray) -> np.ndarray:
         """Propagate inputs through the network and return the final outputs."""
+        if len(inputs) != self.input_count:
+            raise ValueError("Incorrect number of inputs")
+
         self.inputs = inputs.copy()
         next_inputs = inputs
         for i, layer in enumerate(self.layers):
@@ -65,13 +66,19 @@ class Network:
             eta: Learning rate.
             output_derivatives: Error derivatives at the network output.
         """
+
+        self.x += 1
+        if self.x == 1000:
+            pass
+
         dels = self.output_layer.calc_output_gradients(output_derivatives)
         for i in range(len(self.layers) - 2, -1, -1):
-            dels = self.layers[i].calc_gradients(self.weight_matrices[i].transpose(), dels)
+            dels = self.layers[i].calc_gradients(self.weight_matrices[i+1], dels)
 
-        self.weight_matrices[0] -= eta * self.inputs[:, np.newaxis] @ self.layers[0].dels[np.newaxis, :]
+
+        self.weight_matrices[0] -= eta * (np.append([1],self.inputs)[:, np.newaxis] @ self.layers[0].dels[np.newaxis, :])
         for i in range(1, len(self.weight_matrices)):
-            previous_outputs = self.layers[i - 1].outputs
+            previous_outputs = np.append([1], self.layers[i - 1].outputs)
             current_dels = self.layers[i].dels
-            self.weight_matrices[i] -= eta * previous_outputs[:, np.newaxis] @ current_dels[np.newaxis, :]
+            self.weight_matrices[i] -= eta * (previous_outputs[:, np.newaxis] @ current_dels[np.newaxis, :])
             
