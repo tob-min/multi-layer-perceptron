@@ -49,7 +49,7 @@ def single_node_test(f: Callable[[np.ndarray], np.ndarray] = lambda xs: 2*xs + 0
     ys = f(xs)
     samples = np.transpose([xs, ys])
 
-    node = Output_Node(activation, activation_derivative, error_derivative)
+    node = Output_Node(activation, activation_derivative)
     w = np.full(2, 1.)
 
     training_indices = np.random.choice(len(xs), epochs)
@@ -57,8 +57,10 @@ def single_node_test(f: Callable[[np.ndarray], np.ndarray] = lambda xs: 2*xs + 0
     for sample in samples[training_indices]:
         x = sample[0]
         y_target = sample[1]
-        node.calculate(np.array([x]), w)
-        delta = node.calc_output_node_gradient(y_target)
+        y_actual = node.calculate(np.array([x]), w)
+
+        error_gradient = error_derivative(y_actual, y_target)
+        delta = node.calc_output_node_gradient(error_gradient)
 
         bias_gradient = delta # * 1
         w1_gradient = delta * x
