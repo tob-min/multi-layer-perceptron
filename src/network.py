@@ -40,7 +40,7 @@ class Network:
 
         for i in range(len(layer_sizes) - 1):
             self.layers.append(Layer(layer_sizes[i], activation_functions[i], activation_derivatives[i]))
-            # initialise each weight matrix to equally weight all inputs
+            # initialise each weight matrix with random weights
             self.weight_matrices.append(np.random.uniform(0, 1, (layer_sizes[i] + 1, layer_sizes[i + 1])))
 
         self.output_layer = Output_Layer(layer_sizes[-1], activation_functions[-1], activation_derivatives[-1])
@@ -68,7 +68,6 @@ class Network:
         dels = self.output_layer.calc_output_gradients(output_derivatives)
         for i in range(len(self.layers) - 2, -1, -1):
             dels = self.layers[i].calc_gradients(self.weight_matrices[i+1], dels)
-
 
         self.weight_matrices[0] -= eta * (np.append([1],self.inputs)[:, np.newaxis] @ self.layers[0].dels[np.newaxis, :])
         for i in range(1, len(self.weight_matrices)):

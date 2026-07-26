@@ -85,10 +85,12 @@ def quartic_network_test(
     epochs: int = 2000,
     learning_rate: float = 0.01,
     output_file: str | None = None,
+    noise: float = 0.1,
+    network_shape: list[int] = [8, 1],
 ) -> None:
     """Train a small network to fit a quartic function and plot the result."""
     xs = np.asarray(xs, dtype=float)
-    ys = xs ** 4 - 2 * xs ** 2 + 0.5 * xs + 0.3
+    ys = np.random.normal(xs ** 4 - 2 * xs ** 2 + 0.5 * xs + 0.3, noise)
 
     def tanh(x: float) -> float:
         return np.tanh(x)
@@ -96,42 +98,48 @@ def quartic_network_test(
     def tanh_derivative(x: float) -> float:
         return 1 - np.tanh(x) ** 2
 
-    def mse_derivative(y: np.ndarray, y_target: float) -> float:
-        return mean_squared_error_derivative(y[0], y_target)
+    def display() -> None:
+
+        x_test = np.linspace(-2.2, 2.2, 300)
+        predictions = np.array([network.forward(np.array([x])) for x in x_test])
+        plt.clf()
+        plt.scatter(xs, ys, s=8, label="quartic samples")
+        plt.plot(x_test, predictions, color="tab:red", linewidth=2, label="network fit")
+        plt.title("Network fit to a quartic function")
+        plt.xlabel("x")
+        plt.ylabel("y")
+        plt.legend()
+    
+        if output_file:
+            plt.savefig(output_file)
+        else:
+            plt.show()
 
     network = Network(
         input_count=1,
-        layer_sizes=[8, 1],
-        activation_functions=[tanh, lambda x: x],
-        activation_derivatives=[tanh_derivative, lambda _: 1],
+        layer_sizes=network_shape,
+        activation_functions=[tanh for _ in range(len(network_shape) - 1)] + [lambda x: x],
+        activation_derivatives=[tanh_derivative for _ in range(len(network_shape) - 1)] + [lambda _: 1.],
     )
 
-    for _ in range(epochs):
+    for epoch in range(epochs):
         i = np.random.choice(len(xs))
         predictions = network.forward(xs[i:i+1])
         error_derivative = np.array([2 * (predictions[0] - ys[i])])
         network.backprop(learning_rate, error_derivative)
 
+        if 10 * epoch / epochs == (10 * epoch) // epochs:
+            display()
+
     x_test = np.linspace(-2.2, 2.2, 300)
     predictions = np.array([network.forward(np.array([x])) for x in x_test])
 
-    plt.clf()
-    plt.scatter(xs, ys, s=8, label="quartic samples")
-    plt.plot(x_test, predictions, color="tab:red", linewidth=2, label="network fit")
-    plt.title("Network fit to a quartic function")
-    plt.xlabel("x")
-    plt.ylabel("y")
-    plt.legend()
-
-    if output_file:
-        plt.savefig(output_file)
-    else:
-        plt.show()
-
+    display()
 
 def main():
     single_node_test(output_file="./graphs/linear.jpg")
-    quartic_network_test(output_file="./graphs/quartic_network.jpg", epochs=50000, learning_rate=0.005)
+    quartic_network_test(output_file="./graphs/quartic_network.jpg", 
+                         epochs=10000, learning_rate=0.01, network_shape=[10, 1])
 
 
 if __name__ == "__main__":
