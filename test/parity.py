@@ -49,10 +49,10 @@ def parity_problem(a_points: np.ndarray = np.array([(0.,0.), (1.,1.)]),
         ax2 = fig.add_subplot(122, projection="3d")
 
         # Left panel: 2D plot of the training samples and predicted regions.
-        ax1.scatter(coords[:, 0], coords[:, 1], s=18, c=np.where(classes == 0, "#e74c3c", "#3498db"), edgecolor="black", linewidth=0.4, label="training points")
+        ax1.scatter(coords[:, 0], coords[:, 1], s=18, c=np.where(classes == 1, "#e74c3c", "#3498db"), edgecolor="black", linewidth=0.4, label="training points")
 
         test_classes = np.array([classify(net.forward(c)[0]) for c in test_coords])
-        ax1.scatter(test_coords[:, 0], test_coords[:, 1], s=10, c=np.where(test_classes == 0, "#f5b7b1", "#b7d9f2"), alpha=0.45, label="decision regions")
+        ax1.scatter(test_coords[:, 0], test_coords[:, 1], s=10, c=np.where(test_classes == 1, "#f5b7b1", "#b7d9f2"), alpha=0.45, label="decision regions")
 
         ax1.set_xlim(-1, 2)
         ax1.set_ylim(-1, 2)
@@ -63,12 +63,14 @@ def parity_problem(a_points: np.ndarray = np.array([(0.,0.), (1.,1.)]),
 
         # Right panel: 3D surface showing the network output over the input grid.
         surface_values = np.array([net.forward(c)[0] for c in test_coords]).reshape(grid_x.shape)
-        ax2.plot_surface(grid_x, grid_y, surface_values, cmap="viridis", alpha=0.85, edgecolor="none")
+        ax2.plot_surface(grid_x, grid_y, surface_values, cmap="coolwarm", alpha=0.75, edgecolor="none")
         ax2.set_title("Network output surface")
         ax2.set_xlabel("x")
         ax2.set_ylabel("y")
         ax2.set_zlabel("output")
-        ax2.view_init(elev=22, azim=45)
+        ax2.set_xlim(-1, 2)
+        ax2.set_ylim(-1, 2)
+        ax2.view_init(elev=22, azim=-100)
 
         if output_file:
             plt.savefig(output_file, dpi=200, bbox_inches="tight")
@@ -97,7 +99,7 @@ def main():
     parity_problem(output_file="./graphs/parity_2", learning_rate=0.2, epochs=10000, noise = 0.2)
     parity_problem(a_points=np.array([(0, 0), (0., 1.), (1,1)]), 
                    b_points=np.array([(0.5, 0.5), (1, 0), (0.5, 0)]),
-                   output_file="./graphs/parity_3", learning_rate=0.2, 
+                   output_file="./graphs/parity_3", learning_rate=1, 
                    epochs=10000, noise = 0.1, graph_animation=False)
 
 
