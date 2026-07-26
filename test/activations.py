@@ -6,7 +6,12 @@ def mean_squared_error_derivative(y: float, y_target: float) -> float:
 
 def sigmoid(x: float) -> float:
     """Apply the sigmoid activation function to a scalar value."""
-    return 1 / (1 + np.exp(-x))
+    if x >= 0:
+        z = np.exp(-x)
+        return 1 / (1 + z)
+    else:
+        z = np.exp(x)
+        return z / (1 + z)
 
 def sigmoid_derivative(x: float) -> float:
     """Return the derivative of the sigmoid activation function."""

@@ -1,27 +1,16 @@
 from pathlib import Path
 import sys
+sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
+
 from typing import Callable
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 from network import Network
 from output_node import Output_Node
-
-def mean_squared_error_derivative(y: float, y_target: float) -> float:
-    """Return the derivative of the mean squared error with respect to the prediction."""
-    return 2 * (y - y_target)
-
-def sigmoid(x: float) -> float:
-    """Apply the sigmoid activation function to a scalar value."""
-    return 1 / (1 + np.exp(-x))
-
-def sigmoid_derivative(x: float) -> float:
-    """Return the derivative of the sigmoid activation function."""
-    sigma_x = sigmoid(x)
-    return sigma_x * (1 - sigma_x)
+from activations import *
 
 def single_node_test(f: Callable[[np.ndarray], np.ndarray] = lambda xs: 2*xs + 0.1, 
                     xs : np.ndarray = np.arange(0, 1, 0.1),
@@ -92,12 +81,6 @@ def quartic_network_test(
     xs = np.asarray(xs, dtype=float)
     ys = np.random.normal(xs ** 4 - 2 * xs ** 2 + 0.5 * xs + 0.3, noise)
 
-    def tanh(x: float) -> float:
-        return np.tanh(x)
-
-    def tanh_derivative(x: float) -> float:
-        return 1 - np.tanh(x) ** 2
-
     def display() -> None:
 
         x_test = np.linspace(-2.2, 2.2, 300)
@@ -125,7 +108,7 @@ def quartic_network_test(
     for epoch in range(epochs):
         i = np.random.choice(len(xs))
         predictions = network.forward(xs[i:i+1])
-        error_derivative = np.array([2 * (predictions[0] - ys[i])])
+        error_derivative = np.array([(predictions[0] - ys[i])])
         network.backprop(learning_rate, error_derivative)
 
         if 10 * epoch / epochs == (10 * epoch) // epochs:
@@ -137,8 +120,8 @@ def quartic_network_test(
     display()
 
 def main():
-    single_node_test(output_file="./graphs/linear.jpg")
-    quartic_network_test(output_file="./graphs/quartic_network.jpg", 
+    single_node_test(output_file="./graphs/linear")
+    quartic_network_test(output_file="./graphs/quartic_network", 
                          epochs=10000, learning_rate=0.01, network_shape=[10, 1])
 
 
