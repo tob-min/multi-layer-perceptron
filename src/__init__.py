@@ -3,7 +3,7 @@
 from .layer import Layer
 from .network import Network
 from .node import Node
-from .output_layer import Output_Layer
-from .output_node import Output_Node
+from .output_layer import OutputLayer
+from .output_node import OutputNode
 
-__all__ = ["Layer", "Network", "Node", "Output_Layer", "Output_Node"]
+__all__ = ["Layer", "Network", "Node", "OutputLayer", "OutputNode"]

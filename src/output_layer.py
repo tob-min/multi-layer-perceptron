@@ -3,7 +3,7 @@ import numpy as np
 from .layer import Layer
 
 
-class Output_Layer(Layer):
+class OutputLayer(Layer):
     """Represent the final layer of the network."""
 
     def __init__(self, node_count: int,

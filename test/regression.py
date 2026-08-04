@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from src.network import Network
-from src.output_node import Output_Node
+from src.output_node import OutputNode
 from test.activations import *
 
 def single_node_test(f: Callable[[np.ndarray], np.ndarray] = lambda xs: 2*xs + 0.1, 
@@ -44,7 +44,7 @@ def single_node_test(f: Callable[[np.ndarray], np.ndarray] = lambda xs: 2*xs + 0
     ys = f(xs)
     samples = np.transpose([xs, ys])
 
-    node = Output_Node(activation, activation_derivative)
+    node = OutputNode(activation, activation_derivative)
     w = np.full(2, 1.)
 
     training_indices = np.random.choice(len(xs), epochs)

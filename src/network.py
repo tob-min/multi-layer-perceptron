@@ -1,5 +1,5 @@
 from .layer import Layer
-from .output_layer import Output_Layer
+from .output_layer import OutputLayer
 from typing import Callable
 import numpy as np
 
@@ -8,7 +8,7 @@ class Network:
     """Represent a multilayer perceptron composed of layers and weight matrices."""
 
     layers: list[Layer]
-    output_layer: Output_Layer
+    output_layer: OutputLayer
     weight_matrices: list[np.ndarray] # list of matrices of weights between each layer
     input_count: int
     inputs: np.ndarray
@@ -43,7 +43,7 @@ class Network:
             # initialise each weight matrix with random weights
             self.weight_matrices.append(np.random.uniform(0, 1, (layer_sizes[i] + 1, layer_sizes[i + 1])))
 
-        self.output_layer = Output_Layer(layer_sizes[-1], activation_functions[-1], activation_derivatives[-1])
+        self.output_layer = OutputLayer(layer_sizes[-1], activation_functions[-1], activation_derivatives[-1])
         self.layers.append(self.output_layer)
 
     def forward(self, inputs: np.ndarray) -> np.ndarray:

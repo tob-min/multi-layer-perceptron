@@ -1,7 +1,7 @@
 from .node import Node
 
 
-class Output_Node(Node):
+class OutputNode(Node):
     """Represent a node that emits the network's final prediction."""
 
     def calc_output_node_gradient(self, error_delta: float) -> float:
