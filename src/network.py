@@ -1,5 +1,5 @@
-from layer import Layer
-from output_layer import Output_Layer
+from .layer import Layer
+from .output_layer import Output_Layer
 from typing import Callable
 import numpy as np
 

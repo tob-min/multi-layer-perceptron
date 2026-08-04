@@ -1,16 +1,17 @@
 from pathlib import Path
 import sys
-sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
-
 from typing import Callable
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-
-from network import Network
-from output_node import Output_Node
-from activations import *
+from src.network import Network
+from src.output_node import Output_Node
+from test.activations import *
 
 def single_node_test(f: Callable[[np.ndarray], np.ndarray] = lambda xs: 2*xs + 0.1, 
                     xs : np.ndarray = np.arange(0, 1, 0.1),

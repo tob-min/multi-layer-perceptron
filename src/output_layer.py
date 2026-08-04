@@ -1,6 +1,6 @@
 from typing import Callable
 import numpy as np
-from layer import Layer
+from .layer import Layer
 
 
 class Output_Layer(Layer):

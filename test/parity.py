@@ -1,9 +1,13 @@
 from pathlib import Path
 import sys
-sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
-from network import Network
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.network import Network
 import numpy as np
-from activations import sigmoid, sigmoid_derivative
+from test.activations import sigmoid, sigmoid_derivative
 import matplotlib.pyplot as plt
 
 def parity_problem(a_points: np.ndarray = np.array([(0.,0.), (1.,1.)]),
