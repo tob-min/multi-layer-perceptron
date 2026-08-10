@@ -74,4 +74,40 @@ class Network:
             previous_outputs = np.append([1], self.layers[i - 1].outputs)
             current_dels = self.layers[i].dels
             self.weight_matrices[i] -= eta * (previous_outputs[:, np.newaxis] @ current_dels[np.newaxis, :])
-            
+
+    def fit(self, inputs: np.ndarray, targets: np.ndarray, epochs: int = 100, learning_rate: float = 0.01) -> list[float]:
+        """Train the network on a simple dataset and return the loss history."""
+        inputs = np.asarray(inputs, dtype=float)
+        targets = np.asarray(targets, dtype=float)
+
+        if inputs.ndim == 1:
+            inputs = inputs.reshape(-1, 1)
+        if targets.ndim == 1:
+            targets = targets.reshape(-1, 1)
+
+        history: list[float] = []
+        for _ in range(epochs):
+            for sample_input, target in zip(inputs, targets):
+                prediction = self.forward(sample_input)
+                error_derivative = np.array([(prediction[0] - target[0])])
+                self.backprop(learning_rate, error_derivative)
+                history.append(float(np.mean((prediction[0] - target[0]) ** 2)))
+
+        return history
+
+    def predict(self, inputs: np.ndarray) -> np.ndarray:
+        """Return predictions for one or more input samples."""
+        inputs = np.asarray(inputs, dtype=float)
+        if inputs.ndim == 1:
+            inputs = inputs.reshape(1, -1)
+
+        predictions = np.array([self.forward(sample_input) for sample_input in inputs])
+        return predictions.reshape(-1, 1)
+
+    def evaluate(self, inputs: np.ndarray, targets: np.ndarray) -> float:
+        """Return the mean squared error for the provided dataset."""
+        predictions = self.predict(inputs)
+        targets = np.asarray(targets, dtype=float)
+        if targets.ndim == 1:
+            targets = targets.reshape(-1, 1)
+        return float(np.mean((predictions - targets) ** 2))

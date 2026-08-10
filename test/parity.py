@@ -1,10 +1,3 @@
-from pathlib import Path
-import sys
-
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
 from src.network import Network
 import numpy as np
 from test.activations import sigmoid, sigmoid_derivative
