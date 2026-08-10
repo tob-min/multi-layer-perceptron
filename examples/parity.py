@@ -1,6 +1,6 @@
-from src.network import Network
+from multi_layer_perceptron.network import Network
 import numpy as np
-from test.activations import sigmoid, sigmoid_derivative
+from multi_layer_perceptron.activations import sigmoid, sigmoid_derivative
 import matplotlib.pyplot as plt
 
 def parity_problem(a_points: np.ndarray = np.array([(0.,0.), (1.,1.)]),
@@ -92,11 +92,11 @@ def parity_problem(a_points: np.ndarray = np.array([(0.,0.), (1.,1.)]),
     display()
 
 def main():
-    parity_problem(output_file="./graphs/parity_1", learning_rate=0.2, epochs=10000)
-    parity_problem(output_file="./graphs/parity_2", learning_rate=0.2, epochs=10000, noise = 0.2)
+    parity_problem(output_file="./outputs/graphs/parity_1", learning_rate=0.2, epochs=10000)
+    parity_problem(output_file="./outputs/graphs/parity_2", learning_rate=0.2, epochs=10000, noise = 0.2)
     parity_problem(a_points=np.array([(0, 0), (0., 1.), (1,1)]), 
                    b_points=np.array([(0.5, 0.5), (1, 0), (0.5, 0)]),
-                   output_file="./graphs/parity_3", learning_rate=1, 
+                   output_file="./outputs/graphs/parity_3", learning_rate=1, 
                    epochs=10000, noise = 0.1, graph_animation=False)
 
 

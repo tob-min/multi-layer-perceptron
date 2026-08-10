@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from src.network import Network
+from multi_layer_perceptron.network import Network
 
 
 class HigherLevelApiTest(unittest.TestCase):

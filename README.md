@@ -4,16 +4,17 @@ A small educational implementation of a multilayer perceptron (MLP) in Python us
 
 ## Project structure
 
-- src/ — core neural network implementation
+- src/multi_layer_perceptron/ — core package implementation
   - network.py — network orchestration and training updates
   - layer.py — hidden-layer logic
   - node.py — individual neuron computations
   - output_layer.py — output-layer-specific gradient handling
   - output_node.py — output-node helper for training
-- test/ — example scripts and regression tests
+  - activations.py — activation and loss helper functions
+- examples/ — runnable example scripts
   - regression.py — fits a simple function and plots the result
   - parity.py — demonstrates a parity-style classification problem
-  - activations.py — activation and loss helper functions
+- tests/ — regression and package-import tests
 
 ## Installation
 
@@ -29,17 +30,17 @@ python -m pip install numpy matplotlib
 From the repository root, run:
 
 ```bash
-python test/regression
-python test/parity
+python examples/regression.py
+python examples/parity.py
 ```
 
-These scripts will generate plots under the graphs/ directory.
+These scripts will generate plots under the outputs/graphs/ directory.
 
 ## Example usage from Python
 
 ```python
-from src.network import Network
-from test.activations import sigmoid, sigmoid_derivative
+from multi_layer_perceptron.network import Network
+from multi_layer_perceptron.activations import sigmoid, sigmoid_derivative
 
 network = Network(
     input_count=2,

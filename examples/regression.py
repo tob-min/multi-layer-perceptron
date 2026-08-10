@@ -3,9 +3,9 @@ from typing import Callable
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.network import Network
-from src.output_node import OutputNode
-from test.activations import *
+from multi_layer_perceptron.network import Network
+from multi_layer_perceptron.output_node import OutputNode
+from multi_layer_perceptron.activations import *
 
 def single_node_test(f: Callable[[np.ndarray], np.ndarray] = lambda xs: 2*xs + 0.1, 
                     xs : np.ndarray = np.arange(0, 1, 0.1),
@@ -115,8 +115,8 @@ def quartic_network_test(
     display()
 
 def main():
-    single_node_test(output_file="./graphs/linear")
-    quartic_network_test(output_file="./graphs/quartic_network", 
+    single_node_test(output_file="./outputs/graphs/linear")
+    quartic_network_test(output_file="./outputs/graphs/quartic_network", 
                          epochs=10000, learning_rate=0.01, network_shape=[10, 1])
 
 
