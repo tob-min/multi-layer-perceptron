@@ -38,6 +38,12 @@ class Node:
         Raises:
             ValueError: If the weight vector length does not include the bias term.
         """
+        inputs = np.asarray(inputs, dtype=float)
+        input_weights = np.asarray(input_weights, dtype=float)
+
+        if inputs.ndim != 1:
+            raise ValueError("Weight array must be of length one greater than input array")
+
         if len(input_weights) != len(inputs) + 1:
             raise ValueError("Weight array must be of length one greater than input array")
 

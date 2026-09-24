@@ -46,6 +46,12 @@ class Network:
         if not (len(layer_sizes) == len(activation_functions) and len(layer_sizes) == len(activation_derivatives)):
             raise ValueError("layer_sizes, activation_functions, and activation_derivatives must have the same size")
 
+        if not all(callable(fn) for fn in activation_functions):
+            raise ValueError("activation_functions must contain callables for every layer")
+
+        if not all(callable(fn) for fn in activation_derivatives):
+            raise ValueError("activation_derivatives must contain callables for every layer")
+
         self.input_count = input_count
         self.weight_matrices = [np.random.uniform(0, 1, size=(input_count + 1, layer_sizes[0]))]
         self.layers = []
@@ -72,7 +78,7 @@ class Network:
         Raises:
             ValueError: If the input shape does not match the network input count.
         """
-        inputs = np.asarray(inputs, dtype=float)  
+        inputs = np.asarray(inputs, dtype=float)
 
         if inputs.ndim != 1 or len(inputs) != self.input_count:
             raise ValueError(f"Incorrect number of inputs: must be a 1D sample of length {self.input_count}")
@@ -152,6 +158,9 @@ class Network:
 
         inputs = np.asarray(inputs, dtype=float)
         targets = np.asarray(targets, dtype=float)
+        
+        if inputs.size == 0 or targets.size == 0:
+            raise ValueError("There must be at least one sample")
 
         if inputs.ndim == 1:
             inputs = inputs.reshape(-1, 1)
@@ -203,6 +212,9 @@ class Network:
             ValueError: If the supplied samples do not match the configured input count.
         """
         inputs = np.asarray(inputs, dtype=float)
+        
+        if inputs.size == 0:
+            raise ValueError("There must be at least one sample")
 
         if inputs.ndim == 1:
             # if there is only one input, interpret a 1D array as a batch of samples
@@ -237,19 +249,23 @@ class Network:
             ValueError: If the inputs and targets are incompatible with each other or with the
                 network configuration.
         """
+            
         inputs = np.asarray(inputs, dtype=float)
         targets = np.asarray(targets, dtype=float)
+        
+        if inputs.size == 0 or targets.size == 0:
+            raise ValueError("There must be at least one sample")
 
-        if inputs.ndim == 1:
+        if inputs.ndim < 2:
             inputs = inputs.reshape(-1, 1)
-        if targets.ndim == 1:
+        if targets.ndim < 2:
             targets = targets.reshape(-1, 1)
 
         if inputs.shape[0] != targets.shape[0]:
             raise ValueError("Inputs and targets must have the same number of samples")
         
         if (targets.shape[1] != self.output_layer.node_count()):
-            raise ValueError(f"Each target sample must have length {self.output_layer.node_count}")
+            raise ValueError(f"Each target sample must have length {self.output_layer.node_count()}")
 
         predictions = self.predict(inputs)
 

@@ -38,6 +38,21 @@ class Layer:
         Returns:
             An array of outputs from each node in the layer.
         """
+        inputs = np.asarray(inputs, dtype=float)
+        weights = np.asarray(weights, dtype=float)
+
+        if inputs.ndim != 1:
+            raise ValueError("Input array must be a 1D vector")
+
+        if weights.ndim != 2:
+            raise ValueError("Weight array must be a 2D matrix with one column per node")
+
+        if weights.shape[0] != len(inputs) + 1:
+            raise ValueError("Weight array must have one more row than the input vector length")
+
+        if weights.shape[1] != len(self.nodes):
+            raise ValueError("Weight array must have one column per node in the layer")
+
         # Each node uses the same input vector but a different column of the weight matrix.
         self.outputs = np.array([node.calculate(inputs, weights[:, i]) for i, node in enumerate(self.nodes)])
         return np.array(self.outputs)
