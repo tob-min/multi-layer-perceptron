@@ -5,5 +5,13 @@ from .network import Network
 from .node import Node
 from .output_layer import OutputLayer
 from .output_node import OutputNode
+from . import activations
 
-__all__ = ["Layer", "Network", "Node", "OutputLayer", "OutputNode"]
+__all__ = [
+	"Layer",
+	"Network",
+	"Node",
+	"OutputLayer",
+	"OutputNode",
+	"activations",
+]

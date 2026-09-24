@@ -6,6 +6,7 @@ import numpy as np
 from multi_layer_perceptron.network import Network
 from multi_layer_perceptron.output_node import OutputNode
 from multi_layer_perceptron.activations import *
+from plot_helpers import plot_regression_fit, plot_loss
 
 def single_node_test(f: Callable[[np.ndarray], np.ndarray] = lambda xs: 2*xs + 0.1, 
                     xs : np.ndarray = np.arange(0, 1, 0.1),
@@ -77,21 +78,8 @@ def quartic_network_test(
     ys = np.random.normal(xs ** 4 - 2 * xs ** 2 + 0.5 * xs + 0.3, noise)
 
     def display(network) -> None:
-
-        x_test = np.linspace(-2.2, 2.2, 300)
-        predictions = network.predict(x_test)
-        plt.clf()
-        plt.scatter(xs, ys, s=8, label="quartic samples")
-        plt.plot(x_test, predictions, color="tab:red", linewidth=2, label="network fit")
-        plt.title("Network fit to a quartic function")
-        plt.xlabel("x")
-        plt.ylabel("y")
-        plt.legend()
-    
-        if output_file:
-            plt.savefig(output_file)
-        else:
-            plt.show()
+        plot_regression_fit(network, xs, ys, x_test=np.linspace(-2.2, 2.2, 300), output_file=output_file,
+                            title="Network fit to a quartic function")
 
     network = Network(
         input_count=1,
@@ -103,16 +91,7 @@ def quartic_network_test(
     loss = network.fit(xs, ys, epochs, learning_rate)
     
     # Plot loss vs epoch
-    plt.clf()
-    plt.plot(np.arange(1, len(loss) + 1), loss)
-    plt.title("Training Loss vs Epoch")
-    plt.xlabel("Epoch")
-    plt.ylabel("Mean Squared Error")
-    if output_file:
-        # save a separate loss plot alongside the main output (append _loss)
-        plt.savefig(f"{output_file}_loss.png")
-    else:
-        plt.show()
+    plot_loss(loss, output_file=f"{output_file}_loss.png" if output_file else None)
     
     display(network)
 

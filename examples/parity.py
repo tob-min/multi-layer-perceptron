@@ -2,6 +2,7 @@ from multi_layer_perceptron.network import Network
 import numpy as np
 from multi_layer_perceptron.activations import sigmoid, sigmoid_derivative
 import matplotlib.pyplot as plt
+from plot_helpers import plot_parity_decision, plot_loss
 
 def parity_problem(a_points: np.ndarray = np.array([(0.,0.), (1.,1.)]),
                 b_points: np.ndarray = np.array([(0., 1.), (1., 0.)]),
@@ -40,64 +41,28 @@ def parity_problem(a_points: np.ndarray = np.array([(0.,0.), (1.,1.)]),
 
     # Plot both the training points and the current network output surface.
     def display():
-
-        fig = plt.figure(figsize=(12, 5))
-        ax1 = fig.add_subplot(121)
-        ax2 = fig.add_subplot(122, projection="3d")
-
-        # Left panel: 2D plot of the training samples and predicted regions.
-        ax1.scatter(coords[:, 0], coords[:, 1], s=18, c=np.where(classes == 1, "#e74c3c", "#3498db"), edgecolor="black", linewidth=0.4, label="training points")
-
-        test_classes = np.array([classify(net.forward(c)[0]) for c in test_coords])
-        ax1.scatter(test_coords[:, 0], test_coords[:, 1], s=10, c=np.where(test_classes == 1, "#f5b7b1", "#b7d9f2"), alpha=0.45, label="decision regions")
-
-        ax1.set_xlim(-1, 2)
-        ax1.set_ylim(-1, 2)
-        ax1.set_title("Parity classification boundary")
-        ax1.set_xlabel("x")
-        ax1.set_ylabel("y")
-        ax1.legend(loc="upper right", frameon=True)
-
-        # Right panel: 3D surface showing the network output over the input grid.
-        surface_values = np.array([net.forward(c)[0] for c in test_coords]).reshape(grid_x.shape)
-        ax2.plot_surface(grid_x, grid_y, surface_values, cmap="coolwarm", alpha=0.75, edgecolor="none")
-        ax2.set_title("Network output surface")
-        ax2.set_xlabel("x")
-        ax2.set_ylabel("y")
-        ax2.set_zlabel("output")
-        ax2.set_xlim(-1, 2)
-        ax2.set_ylim(-1, 2)
-        ax2.view_init(elev=22, azim=-100)
-
-        if output_file:
-            plt.savefig(output_file, dpi=200, bbox_inches="tight")
-        else:
-            plt.show()
-
-        plt.close()
+        plot_parity_decision(net, coords, classes, grid_x, grid_y, test_coords, output_file=output_file)
 
     # Show the initial state before training.
     display()
 
-    # Train the network by repeatedly updating it from random samples.
-    for epoch in range(epochs):
-        i = np.random.randint(len(classes))
-        output = net.forward(coords[i])
-        error_gradient = -2 * (classes[i] - output)
-        net.backprop(learning_rate, np.array(error_gradient))
+    # Train the network using the higher-level API.
+    targets = classes.reshape(-1, 1).astype(float)
+    history = net.fit(coords, targets, epochs=epochs, learning_rate=learning_rate)
 
-        if graph_animation and 10 * epoch / epochs == (10 * epoch) // epochs:
-            display()
+    # Plot loss vs epoch
+    plot_loss(history, output_file=f"{output_file}_loss.png" if output_file else None)
 
+    # Show the final state after training.
     display()
 
 def main():
-    parity_problem(output_file="./outputs/graphs/parity_1", learning_rate=0.2, epochs=10000)
-    parity_problem(output_file="./outputs/graphs/parity_2", learning_rate=0.2, epochs=10000, noise = 0.2)
+    parity_problem(output_file="./outputs/graphs/parity_1", learning_rate=0.2, epochs=100)
+    parity_problem(output_file="./outputs/graphs/parity_2", learning_rate=0.2, epochs=100, noise = 0.2)
     parity_problem(a_points=np.array([(0, 0), (0., 1.), (1,1)]), 
                    b_points=np.array([(0.5, 0.5), (1, 0), (0.5, 0)]),
                    output_file="./outputs/graphs/parity_3", learning_rate=1, 
-                   epochs=10000, noise = 0.1, graph_animation=False)
+                   epochs=100, noise = 0.1, graph_animation=False)
 
 
 if __name__ == "__main__":

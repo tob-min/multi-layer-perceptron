@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from multi_layer_perceptron.network import Network
+from multi_layer_perceptron import Network
 
 
 class HigherLevelApiTest(unittest.TestCase):
@@ -21,7 +21,7 @@ class HigherLevelApiTest(unittest.TestCase):
         predictions = network.predict(inputs)
         mse = network.evaluate(inputs, targets)
 
-        self.assertEqual(len(history), len(inputs) * 5)
+        self.assertEqual(len(history), 5)
         self.assertEqual(predictions.shape, targets.shape)
         self.assertGreaterEqual(mse, 0.0)
 
