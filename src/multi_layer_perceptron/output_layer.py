@@ -1,3 +1,9 @@
+"""Output-layer logic for the multilayer perceptron.
+
+The final layer differs from hidden layers because its gradient computation is
+scaled by the chosen loss derivative before backpropagation continues.
+"""
+
 from typing import Callable
 import numpy as np
 from .layer import Layer
@@ -20,12 +26,13 @@ class OutputLayer(Layer):
 
     def calc_output_gradients(self, error_derivatives: np.ndarray) -> np.ndarray:
         """Return the gradients for each output node.
-        
+
         Args:
             error_derivatives: Error derivatives for each output node.
 
         Returns:
             Element-wise gradients for the output layer.
         """
+        # For output nodes, the local derivative is the activation derivative times the loss derivative.
         self.dels = np.array([node.activation_prime(node.weighted_sum) for node in self.nodes]) * error_derivatives
         return self.dels

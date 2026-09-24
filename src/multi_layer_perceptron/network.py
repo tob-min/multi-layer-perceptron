@@ -1,3 +1,9 @@
+"""Core multilayer perceptron implementation.
+
+This module contains the primary training and inference logic for the project,
+including forward propagation, backpropagation, and the high-level fit/predict/evaluate API.
+"""
+
 from .layer import Layer
 from .output_layer import OutputLayer
 from typing import Callable
@@ -76,6 +82,7 @@ class Network:
 
         for i, layer in enumerate(self.layers):
             next_inputs = layer.calculate(next_inputs, self.weight_matrices[i])
+            
         return next_inputs
 
 
@@ -166,12 +173,17 @@ class Network:
 
         history: list[float] = []
         for _ in range(epochs):
+            # deliver input samples in a random order
             order = np.random.permutation(len(inputs))
             error = 0
+            
             for i in order:
                 prediction = self.forward(inputs[i])
                 self.backprop(learning_rate, error_derivative(prediction, targets[i]))
+                # uses mean squared error TODO: allow arbitrary error function
                 error += (prediction[0] - targets[i]) ** 2
+                
+            # return mean error
             history.append(error / len(inputs))
 
         return history

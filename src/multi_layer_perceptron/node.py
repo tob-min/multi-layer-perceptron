@@ -1,5 +1,12 @@
+"""Single-neuron calculations for the multilayer perceptron.
+
+Each Node stores a scalar activation function and its derivative, then applies the
+bias-adjusted weighted sum used during forward propagation and backpropagation.
+"""
+
 import numpy as np
 from typing import Callable
+
 
 class Node:
     """Represent a single artificial neuron with an activation function."""
@@ -15,7 +22,6 @@ class Node:
             activation_function: Activation function applied to the node's weighted sum.
             activation_prime: Derivative of the activation function.
         """
-        
         self.activation = activation_function
         self.activation_prime = activation_prime
 
@@ -30,12 +36,12 @@ class Node:
             The activated scalar output of the node.
 
         Raises:
-            ValueError: If len(inputs) != input_count.
+            ValueError: If the weight vector length does not include the bias term.
         """
-
         if len(input_weights) != len(inputs) + 1:
             raise ValueError("Weight array must be of length one greater than input array")
 
+        # The first weight acts as the bias term; remaining weights scale each input feature.
         self.weighted_sum = input_weights[0] + np.dot(inputs, input_weights[1:])
         return self.activation(self.weighted_sum)
 
@@ -49,4 +55,5 @@ class Node:
         Returns:
             The gradient for this node's weighted sum.
         """
+        # Chain rule: local derivative = activation derivative × weighted sum of downstream deltas.
         return self.activation_prime(self.weighted_sum) * np.dot(output_weights, output_dels)

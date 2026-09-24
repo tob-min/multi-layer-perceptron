@@ -1,3 +1,9 @@
+"""Layer and node grouping utilities for the multilayer perceptron.
+
+A layer represents a collection of neurons that share the same activation and
+activation-derivative functions.
+"""
+
 from .node import Node
 from typing import Callable
 import numpy as np
@@ -32,6 +38,7 @@ class Layer:
         Returns:
             An array of outputs from each node in the layer.
         """
+        # Each node uses the same input vector but a different column of the weight matrix.
         self.outputs = np.array([node.calculate(inputs, weights[:, i]) for i, node in enumerate(self.nodes)])
         return np.array(self.outputs)
 
@@ -45,7 +52,8 @@ class Layer:
         Returns:
             An array of gradients for each node in the layer.
         """
-        self.dels = np.array([node.calc_gradient(output_weights[i+1, :], output_dels) for i, node in enumerate(self.nodes)])
+        # The bias row is skipped when reading the downstream weights for each node.
+        self.dels = np.array([node.calc_gradient(output_weights[i + 1, :], output_dels) for i, node in enumerate(self.nodes)])
         return self.dels
 
     def node_count(self) -> int:

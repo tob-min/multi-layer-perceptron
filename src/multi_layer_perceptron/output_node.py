@@ -1,3 +1,9 @@
+"""Output-node helper for single-output training examples.
+
+This small helper mirrors the final-layer gradient logic used by the training
+network, but in a more direct scalar form.
+"""
+
 from .node import Node
 
 
@@ -13,4 +19,5 @@ class OutputNode(Node):
         Returns:
             The gradient for the output node's weighted sum.
         """
+        # Apply the chain rule to convert the loss derivative into a weighted-sum gradient.
         return self.activation_prime(self.weighted_sum) * error_delta
