@@ -46,7 +46,7 @@ class Layer:
             An array of gradients for each node in the layer.
         """
         self.dels = np.array([node.calc_gradient(output_weights[i+1, :], output_dels) for i, node in enumerate(self.nodes)])
-        return np.array(self.dels)
+        return self.dels
 
     def node_count(self) -> int:
         """Return the number of nodes in the layer."""

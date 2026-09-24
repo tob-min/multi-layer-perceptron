@@ -76,10 +76,10 @@ def quartic_network_test(
     xs = np.asarray(xs, dtype=float)
     ys = np.random.normal(xs ** 4 - 2 * xs ** 2 + 0.5 * xs + 0.3, noise)
 
-    def display() -> None:
+    def display(network) -> None:
 
         x_test = np.linspace(-2.2, 2.2, 300)
-        predictions = np.array([network.forward(np.array([x])) for x in x_test])
+        predictions = network.predict(x_test)
         plt.clf()
         plt.scatter(xs, ys, s=8, label="quartic samples")
         plt.plot(x_test, predictions, color="tab:red", linewidth=2, label="network fit")
@@ -99,25 +99,27 @@ def quartic_network_test(
         activation_functions=[tanh for _ in range(len(network_shape) - 1)] + [lambda x: x],
         activation_derivatives=[tanh_derivative for _ in range(len(network_shape) - 1)] + [lambda _: 1.],
     )
-
-    for epoch in range(epochs):
-        i = np.random.choice(len(xs))
-        predictions = network.forward(xs[i:i+1])
-        error_derivative = np.array([(predictions[0] - ys[i])])
-        network.backprop(learning_rate, error_derivative)
-
-        if 10 * epoch / epochs == (10 * epoch) // epochs:
-            display()
-
-    x_test = np.linspace(-2.2, 2.2, 300)
-    predictions = np.array([network.forward(np.array([x])) for x in x_test])
-
-    display()
+    
+    loss = network.fit(xs, ys, epochs, learning_rate)
+    
+    # Plot loss vs epoch
+    plt.clf()
+    plt.plot(np.arange(1, len(loss) + 1), loss)
+    plt.title("Training Loss vs Epoch")
+    plt.xlabel("Epoch")
+    plt.ylabel("Mean Squared Error")
+    if output_file:
+        # save a separate loss plot alongside the main output (append _loss)
+        plt.savefig(f"{output_file}_loss.png")
+    else:
+        plt.show()
+    
+    display(network)
 
 def main():
     single_node_test(output_file="./outputs/graphs/linear")
     quartic_network_test(output_file="./outputs/graphs/quartic_network", 
-                         epochs=10000, learning_rate=0.01, network_shape=[10, 1])
+                         epochs=100, learning_rate=0.02, network_shape=[10,1])
 
 
 if __name__ == "__main__":

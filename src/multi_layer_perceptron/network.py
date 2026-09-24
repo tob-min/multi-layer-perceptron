@@ -75,31 +75,65 @@ class Network:
             current_dels = self.layers[i].dels
             self.weight_matrices[i] -= eta * (previous_outputs[:, np.newaxis] @ current_dels[np.newaxis, :])
 
-    def fit(self, inputs: np.ndarray, targets: np.ndarray, epochs: int = 100, learning_rate: float = 0.01) -> list[float]:
-        """Train the network on a simple dataset and return the loss history."""
+    def fit(self, inputs: np.ndarray, targets: np.ndarray, epochs: int = 100, learning_rate: float = 0.01,
+            error_derivative: Callable[[np.ndarray, np.ndarray], np.ndarray] = (lambda pred, target: pred - target) 
+            ) -> list[float]:
+        """Train the network on a simple dataset and return the loss history.
+        
+        Args:
+        
+            inputs: array of float arrays of length input_count
+            targets: array of float arrays of target output values with same length as output layer
+            epochs: int
+            learning_rate: float
+            error_derivative: derivative of error function wrt value at each output node. Accepts 
+                pred: array of values the network output layer
+                targets: array of expected output values
+                Default is for a difference squared error
+                
+        Returns:
+            List of mean error values at each epoch
+        """
+        
         inputs = np.asarray(inputs, dtype=float)
         targets = np.asarray(targets, dtype=float)
-
+        
         if inputs.ndim == 1:
             inputs = inputs.reshape(-1, 1)
         if targets.ndim == 1:
             targets = targets.reshape(-1, 1)
 
-        history: list[float] = []
-        for _ in range(epochs):
-            for sample_input, target in zip(inputs, targets):
-                prediction = self.forward(sample_input)
-                error_derivative = np.array([(prediction[0] - target[0])])
-                self.backprop(learning_rate, error_derivative)
-                history.append(float(np.mean((prediction[0] - target[0]) ** 2)))
+        # Validation: inputs and targets must have the same number of samples
+        if inputs.shape[0] != targets.shape[0]:
+            raise ValueError("Inputs and targets must have the same number of samples")
 
+        # After reshaping, each input sample must have length `input_count`
+        if inputs.shape[1] != self.input_count:
+            raise ValueError(f"Each input sample must have length {self.input_count}")
+
+        # Each target sample must have the same length as the output layer
+        expected_output_len = len(self.output_layer.nodes)
+        if targets.shape[1] != expected_output_len:
+            raise ValueError(f"Each target sample must have length {expected_output_len}")
+            
+        
+        history: list[float] = []
+        for _ in range(epochs):         
+            order = np.random.permutation(len(inputs))
+            error = 0   
+            for i in order:
+                prediction = self.forward(inputs[i])
+                self.backprop(learning_rate, error_derivative(prediction, targets[i]))
+                error += (prediction[0] - targets[i]) ** 2
+            history.append(error / len(inputs))
+                
         return history
 
     def predict(self, inputs: np.ndarray) -> np.ndarray:
         """Return predictions for one or more input samples."""
         inputs = np.asarray(inputs, dtype=float)
         if inputs.ndim == 1:
-            inputs = inputs.reshape(1, -1)
+            inputs = inputs.reshape(-1, 1)
 
         predictions = np.array([self.forward(sample_input) for sample_input in inputs])
         return predictions.reshape(-1, 1)
