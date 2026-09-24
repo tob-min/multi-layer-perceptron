@@ -35,10 +35,6 @@ def parity_problem(a_points: np.ndarray = np.array([(0.,0.), (1.,1.)]),
     grid_x, grid_y = np.meshgrid(x_vals, y_vals)
     test_coords = np.column_stack((grid_x.ravel(), grid_y.ravel()))
 
-    # Convert the network output into a hard class decision for plotting.
-    def classify(p: float) -> int:
-        return 1 if p > 0.5 else 0
-
     # Plot both the training points and the current network output surface.
     def display():
         plot_parity_decision(net, coords, classes, grid_x, grid_y, test_coords, output_file=output_file)
