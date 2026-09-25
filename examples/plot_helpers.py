@@ -1,5 +1,14 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
+
+
+def _ensure_parent_dir(path: str | None) -> None:
+    if path:
+        parent = os.path.dirname(path)
+        if parent:
+            os.makedirs(parent, exist_ok=True)
 
 
 def plot_regression_fit(network, xs, ys, x_test=None, output_file: str | None = None, title: str | None = None):
@@ -17,7 +26,8 @@ def plot_regression_fit(network, xs, ys, x_test=None, output_file: str | None = 
     plt.ylabel("y")
     plt.legend()
     if output_file:
-        plt.savefig(output_file)
+        _ensure_parent_dir(output_file)
+        plt.savefig(output_file, dpi=200, bbox_inches="tight")
     else:
         plt.show()
 
@@ -30,7 +40,8 @@ def plot_loss(history, output_file: str | None = None):
     plt.xlabel("Epoch")
     plt.ylabel("Mean Squared Error")
     if output_file:
-        plt.savefig(output_file)
+        _ensure_parent_dir(output_file)
+        plt.savefig(output_file, dpi=200, bbox_inches="tight")
     else:
         plt.show()
 
@@ -66,6 +77,7 @@ def plot_parity_decision(network, coords, classes, grid_x, grid_y, test_coords, 
     ax2.view_init(elev=22, azim=-100)
 
     if output_file:
+        _ensure_parent_dir(output_file)
         plt.savefig(output_file, dpi=200, bbox_inches="tight")
     else:
         plt.show()

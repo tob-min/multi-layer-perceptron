@@ -133,6 +133,34 @@ The example scripts generate plots in `outputs/graphs/`:
 - `regression.py` trains a network to approximate a target function.
 - `parity.py` trains a noisy parity-style classifier and visualizes the decision boundary.
 
+## Featured outputs
+
+The project includes a few short demos:
+
+### Regression fit
+
+This example trains a small network to fit a quartic function and saves the learned curve alongside the training loss.
+
+- `outputs/graphs/quartic_network.png`
+- `outputs/graphs/quartic_network_loss.png`
+
+### Parity classification
+
+This example trains a binary classifier on synthetic noisy parity-like points and visualizes the learned separation boundary.
+
+- `outputs/graphs/parity_1.png`
+- `outputs/graphs/parity_1_final.png`
+- `outputs/graphs/parity_1_loss.png`
+- `outputs/graphs/parity_2.png`
+- `outputs/graphs/parity_2_final.png`
+- `outputs/graphs/parity_2_loss.png`
+
+### Simple linear fit
+
+A single-node regression example illustrates the most basic form of gradient descent and function approximation.
+
+- `outputs/graphs/linear_fit.png`
+
 ## Testing
 
 The project includes a small test suite built with `unittest` and `pytest`-compatible conventions.
