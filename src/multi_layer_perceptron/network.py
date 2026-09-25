@@ -190,7 +190,7 @@ class Network:
                 prediction = self.forward(inputs[i])
                 self.backprop(learning_rate, error_derivative(prediction, targets[i]))
                 # uses mean squared error TODO: allow arbitrary error function
-                error += (prediction[0] - targets[i]) ** 2
+                error += np.sum((prediction - targets[i]) ** 2)
                 
             # return mean error
             history.append(error / len(inputs))

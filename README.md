@@ -1,10 +1,12 @@
-# Multi Layer Perceptron
+# Multi-Layer Perceptron
 
-A compact NumPy-based implementation of a multilayer perceptron for learning and experimentation. The project includes a higher-level training API, reusable activation helpers, and example scripts that fit simple regression and parity-style classification tasks.
+A compact NumPy-based implementation of a multilayer perceptron designed for learning, experimentation, and demos. The project focuses on the fundamentals of neural-network training: forward propagation, backpropagation, activation functions, and gradient-based optimization.
 
-## Current status
+## Overview
 
-This repository is a small educational implementation rather than a production ML framework. The public API currently centers on the `Network` class in the top-level package:
+This repository is intentionally small and educational. It is not a production ML framework, but it does provide a working end-to-end implementation of a feedforward network with a clean high-level API.
+
+The package centers on the `Network` class and exposes a simple training workflow for supervised learning tasks:
 
 - `Network(input_count, layer_sizes, activation_functions, activation_derivatives)`
 - `Network.forward(inputs)`
@@ -13,35 +15,43 @@ This repository is a small educational implementation rather than a production M
 - `Network.predict(inputs)`
 - `Network.evaluate(inputs, targets)`
 
-The package exports the network and supporting layers from `multi_layer_perceptron`.
+## Why this project exists
 
-## Project structure
+This project was built to explore how neural networks work at a low level:
 
-- `src/multi_layer_perceptron/` — source package
-  - `__init__.py` — package exports
-  - `network.py` — core network orchestration and training logic
-  - `layer.py` — layer implementation and gradient propagation
-  - `node.py` — neuron forward pass and local gradient math
-  - `output_layer.py` — output layer implementation
-  - `output_node.py` — output-node helper for final-layer gradients
-  - `activations.py` — activation functions and common derivative helpers
-- `examples/` — runnable examples
-  - `regression.py` — trains a network to fit a function and saves plots
-  - `parity.py` — trains a classifier for a noisy parity-style problem
-  - `plot_helpers.py` — helper functions used by the example scripts
-- `tests/` — package and API regression tests
-- `outputs/graphs/` — generated plots from the example scripts
+- weights and biases are updated manually
+- activations are defined explicitly
+- gradients are propagated through each layer
+- the training loop is designed to be readable rather than abstracted away
+
+That makes it useful for understanding the mechanics behind modern ML libraries without depending on PyTorch or TensorFlow.
+
+## Repository structure
+
+- `src/multi_layer_perceptron/` — package source code
+  - `network.py` — training loop, forward pass, and prediction utilities
+  - `layer.py` — hidden-layer calculation and local gradient logic
+  - `node.py` — single-neuron activation and weight math
+  - `output_layer.py` — final-layer gradient handling
+  - `output_node.py` — scalar output-node utility used in didactic examples
+  - `activations.py` — sigmoid and tanh helper functions and derivatives
+- `examples/` — runnable example scripts
+  - `regression.py` — fits a function and saves plotting output
+  - `parity.py` — trains a noisy parity-style classifier
+  - `plot_helpers.py` — plotting utilities for the examples
+- `tests/` — regression tests covering validation, training, and API behavior
+- `outputs/graphs/` — generated plots from example runs
 
 ## Installation
 
-Python 3.9+ is required. Install the package in editable mode from the repository root:
+Python 3.9+ is required. Install the project in editable mode from the repository root:
 
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -e .
 ```
 
-The package dependencies are currently:
+Dependencies:
 
 - `numpy`
 - `matplotlib`
@@ -63,7 +73,7 @@ network = Network(
     activation_derivatives=[lambda _: 1.0],
 )
 
-history = network.fit(x, y, epochs=5, learning_rate=0.01)
+history = network.fit(x, y, epochs=20, learning_rate=0.01)
 predictions = network.predict(x)
 mse = network.evaluate(x, y)
 
@@ -72,7 +82,7 @@ print(predictions)
 print(mse)
 ```
 
-A more realistic example with a hidden layer is:
+A simple hidden-layer example:
 
 ```python
 from multi_layer_perceptron import Network
@@ -91,7 +101,7 @@ print(network.forward(features[0]))
 
 ## Training workflow
 
-The higher-level training API is designed around a simple supervised learning flow:
+The project supports a straightforward supervised-learning pattern:
 
 ```python
 inputs = np.asarray(inputs, dtype=float)
@@ -102,12 +112,12 @@ predictions = network.predict(inputs)
 loss = network.evaluate(inputs, targets)
 ```
 
-A few important details from the current implementation:
+A few implementation details are worth noting:
 
-- `fit()` accepts either 1D or 2D arrays and reshapes them automatically when needed.
-- Each sample in `inputs` must have length equal to `input_count`.
-- Each sample in `targets` must match the output-layer width.
-- The default error derivative is `pred - target`, so the loss is effectively the squared error used during training.
+- `fit()` accepts both 1D and 2D inputs and reshapes automatically when needed.
+- Each input sample must match the configured `input_count`.
+- Each target sample must match the output-layer width.
+- By default, the loss derivative is defined as `prediction - target`.
 
 ## Example scripts
 
@@ -118,24 +128,44 @@ python examples/regression.py
 python examples/parity.py
 ```
 
-These scripts generate plots to the `outputs/graphs/` directory.
+The example scripts generate plots in `outputs/graphs/`:
 
-- `examples/regression.py` trains a small network to approximate a function and stores plots such as the regression fit and training loss.
-- `examples/parity.py` trains a parity-style classifier and produces a decision boundary plot as well as a loss curve.
+- `regression.py` trains a network to approximate a target function.
+- `parity.py` trains a noisy parity-style classifier and visualizes the decision boundary.
 
 ## Testing
 
-The project includes a small unittest suite. Run it with:
+The project includes a small test suite built with `unittest` and `pytest`-compatible conventions.
+
+Run it with:
 
 ```bash
-pytest
+python -m pytest -q
 ```
-or
+
+or:
 
 ```bash
 python -m unittest discover -s tests
 ```
 
-## Notes
+## Current scope and limitations
 
-This package is intentionally minimal and educational. It is useful for understanding forward passes, backpropagation, activation functions, and custom layer construction, but it is not a feature-complete ML toolkit.
+This implementation is intentionally minimal and is best understood as a teaching project. It is useful for learning:
+
+- gradient descent
+- backpropagation
+- activation functions
+- layer-to-layer weight updates
+
+It is not a general-purpose ML framework and does not include advanced tooling such as:
+
+- distributed training
+- batch optimization libraries
+- GPU acceleration
+- production model serialization
+- a full training pipeline for large datasets
+
+## License
+
+This project is released under the MIT License.
