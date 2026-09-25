@@ -149,11 +149,13 @@ This example trains a small network to fit a quartic function and saves the lear
 This example trains a binary classifier on synthetic noisy parity-like points and visualizes the learned separation boundary.
 
 - `outputs/graphs/parity_1.png`
-- `outputs/graphs/parity_1_final.png`
 - `outputs/graphs/parity_1_loss.png`
 - `outputs/graphs/parity_2.png`
-- `outputs/graphs/parity_2_final.png`
 - `outputs/graphs/parity_2_loss.png`
+
+This plot comes from `parity_1`: the left panel shows the noisy training points for each class, while the right panel shows the model’s learned output surface across the input space, revealing the decision boundary it inferred.
+
+![Parity output plot](outputs/graphs/parity_readme_example.png)
 
 ### Simple linear fit
 

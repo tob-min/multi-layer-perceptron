@@ -32,11 +32,3 @@ dist/
 # OS files
 .DS_Store
 Thumbs.db
-
-# Generated project outputs
-outputs/
-graphs/
-*.png
-*.jpg
-*.jpeg
-*.pdf
