@@ -6,7 +6,7 @@ including forward propagation, backpropagation, and the high-level fit/predict/e
 
 from .layer import Layer
 from .output_layer import OutputLayer
-from typing import Callable
+from typing import Callable, Literal
 import numpy as np
 
 
@@ -20,8 +20,14 @@ class Network:
     inputs: np.ndarray
 
 
-    def __init__(self, input_count: int, layer_sizes: list[int], activation_functions: list[Callable[[float], float]],
-                 activation_derivatives: list[Callable[[float], float]]) -> None:
+    def __init__(
+        self,
+        input_count: int,
+        layer_sizes: list[int],
+        activation_functions: list[Callable[[float], float]],
+        activation_derivatives: list[Callable[[float], float]],
+        weight_initialization: Literal["xavier", "he", "uniform"] = "xavier",
+    ) -> None:
         """Initialize the network and its weight matrices.
 
         Args:
@@ -29,10 +35,12 @@ class Network:
             layer_sizes: Sizes of each layer, including the output layer.
             activation_functions: Activation function for each layer.
             activation_derivatives: Activation-derivative function for each layer.
+            weight_initialization: Weight scheme: Xavier by default, He for ReLU-style
+                activations, or the legacy positive uniform distribution.
 
         Raises:
             ValueError: If the network is missing layers, if the configuration lists do not match,
-                or if any layer definition is invalid.
+                if any layer definition is invalid, or if the weight initialization is unknown.
         """
         if input_count <= 0:
             raise ValueError("input_count must be a positive integer")
@@ -52,17 +60,61 @@ class Network:
         if not all(callable(fn) for fn in activation_derivatives):
             raise ValueError("activation_derivatives must contain callables for every layer")
 
-        self.input_count = input_count
-        self.weight_matrices = [np.random.uniform(0, 1, size=(input_count + 1, layer_sizes[0]))]
-        self.layers = []
+        if weight_initialization not in {"xavier", "he", "uniform"}:
+            raise ValueError("weight_initialization must be 'xavier', 'he', or 'uniform'")
 
+        self.input_count = input_count
+        self.layers = []        
+        
+        self.initalise_weights(input_count, layer_sizes, weight_initialization)
+
+        # initalise layers
         for i in range(len(layer_sizes) - 1):
             self.layers.append(Layer(layer_sizes[i], activation_functions[i], activation_derivatives[i]))
-            # initialise each weight matrix with random weights
-            self.weight_matrices.append(np.random.uniform(0, 1, (layer_sizes[i] + 1, layer_sizes[i + 1])))
 
         self.output_layer = OutputLayer(layer_sizes[-1], activation_functions[-1], activation_derivatives[-1])
         self.layers.append(self.output_layer)
+        
+    def initalise_weights(self,
+        input_count: int, 
+        layer_sizes: list[int], 
+        weight_initialization: Literal["xavier", "he", "uniform"] = "xavier"
+    ) -> None:
+        """Create weight matrices for each connection between network layers.
+
+        Args:
+            input_count: Number of input features to the network.
+            layer_sizes: Number of nodes in each network layer.
+            weight_initialization: Scheme used to initialize the weights: Xavier,
+                He, or the legacy uniform distribution from 0 to 1.
+
+        Notes:
+            Xavier and He initialization set bias weights to zero. The legacy
+            uniform scheme initializes bias weights along with other weights.
+        """
+
+        self.weight_matrices = []
+        
+        # prepend input count so we can also construct the input weight matrix
+        layer_widths = [input_count, *layer_sizes]
+        
+        for fan_in, fan_out in zip(layer_widths, layer_widths[1:]):
+            # initalise to zero matrix of correct size
+            # bias weight left at 0
+            weights = np.zeros((fan_in + 1, fan_out))
+            
+            if weight_initialization == "xavier":
+                limit = np.sqrt(6.0 / (fan_in + fan_out))
+                weights[1:] = np.random.uniform(-limit, limit, size=(fan_in, fan_out))
+                
+            elif weight_initialization == "he":
+                standard_deviation = np.sqrt(2.0 / fan_in)
+                weights[1:] = np.random.normal(0.0, standard_deviation, size=(fan_in, fan_out))
+                
+            else: # uniform
+                weights = np.random.uniform(0.0, 1.0, size=weights.shape)
+                
+            self.weight_matrices.append(weights)
 
 
     def forward(self, inputs: np.ndarray) -> np.ndarray:
@@ -118,12 +170,21 @@ class Network:
         if not hasattr(self, "inputs"):
             raise ValueError("Network inputs are not set; call forward() before backprop()")
 
+        # Start with output deltas: the loss derivative multiplied by each output
+        # node's activation derivative.
         dels = self.output_layer.calc_output_gradients(output_derivatives)
         for i in range(len(self.layers) - 2, -1, -1):
+            # Propagate deltas backward through the next layer's weights and each
+            # hidden node's activation derivative (the chain rule).
             dels = self.layers[i].calc_gradients(self.weight_matrices[i + 1], dels)
 
+        # For a weight, its gradient is the sending node's output times the
+        # receiving node's delta. The leading 1 represents the bias input.
         self.weight_matrices[0] -= eta * (np.append([1], self.inputs)[:, np.newaxis] @ self.layers[0].dels[np.newaxis, :])
+        
         for i in range(1, len(self.weight_matrices)):
+            # The outer product of previous-layer outputs (plus bias) and current
+            # deltas gives the full gradient matrix for this connection.
             previous_outputs = np.append([1], self.layers[i - 1].outputs)
             current_dels = self.layers[i].dels
             self.weight_matrices[i] -= eta * (previous_outputs[:, np.newaxis] @ current_dels[np.newaxis, :])

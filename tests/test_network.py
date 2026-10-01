@@ -22,6 +22,40 @@ class NetworkTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "positive integer"):
             Network(0, [1], [lambda x: x], [lambda _: 1.0])
 
+    def test_default_weight_initialization_uses_xavier_and_zero_biases(self) -> None:
+        np.random.seed(0)
+        network = Network(
+            input_count=2,
+            layer_sizes=[3, 1],
+            activation_functions=[lambda x: x, lambda x: x],
+            activation_derivatives=[lambda _: 1.0, lambda _: 1.0],
+        )
+
+        for weights, fan_in, fan_out in zip(network.weight_matrices, [2, 3], [3, 1]):
+            limit = np.sqrt(6.0 / (fan_in + fan_out))
+            self.assertTrue(np.all(weights[0] == 0.0))
+            self.assertTrue(np.all(np.abs(weights[1:]) <= limit))
+            self.assertTrue(np.any(weights[1:] < 0.0))
+
+    def test_weight_initialization_options(self) -> None:
+        network = Network(
+            input_count=2,
+            layer_sizes=[1],
+            activation_functions=[lambda x: x],
+            activation_derivatives=[lambda _: 1.0],
+            weight_initialization="he",
+        )
+        self.assertTrue(np.all(network.weight_matrices[0][0] == 0.0))
+
+        with self.assertRaisesRegex(ValueError, "weight_initialization"):
+            Network(
+                input_count=2,
+                layer_sizes=[1],
+                activation_functions=[lambda x: x],
+                activation_derivatives=[lambda _: 1.0],
+                weight_initialization="unknown",  # type: ignore[arg-type]
+            )
+
     def test_forward_and_predict_shapes(self) -> None:
         network = Network(
             input_count=2,
