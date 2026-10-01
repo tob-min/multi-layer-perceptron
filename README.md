@@ -38,6 +38,7 @@ That makes it useful for understanding the mechanics behind modern ML libraries 
 - `examples/` — runnable example scripts
   - `regression.py` — fits a function and saves plotting output
   - `parity.py` — trains a noisy parity-style classifier
+  - `digits.py` — classifies images from scikit-learn's 8x8 handwritten-digits dataset
   - `plot_helpers.py` — plotting utilities for the examples
 - `tests/` — regression tests covering validation, training, and API behavior
 - `outputs/graphs/` — generated plots from example runs
@@ -62,6 +63,8 @@ Dependencies:
 
 - `numpy`
 - `matplotlib`
+
+The digits example additionally requires the optional `scikit-learn` dependency installed with `.[examples]` above.
 
 ## Quick start
 
@@ -126,6 +129,17 @@ A few implementation details are worth noting:
 - Each target sample must match the output-layer width.
 - By default, the loss derivative is defined as `prediction - target`.
 
+Networks initialize weights with Xavier initialization by default, which scales
+random weights according to the sizes of the connected layers and sets biases to
+zero. Select another scheme with the `weight_initialization` argument:
+
+- `"xavier"` — uniform, zero-centered weights; the default and a suitable choice for sigmoid or tanh activations.
+- `"he"` — normally distributed weights; commonly used with ReLU-style activations.
+- `"uniform"` — legacy weights sampled uniformly from 0 to 1, including biases.
+
+The network does not infer an initializer from activation functions, so choose
+the scheme that suits the activations in your model.
+
 ## Example scripts
 
 From the repository root, run:
@@ -133,13 +147,25 @@ From the repository root, run:
 ```bash
 python examples/regression.py
 python examples/parity.py
+python examples/digits.py
 ```
+
+The digits example requires the optional dependency installed as shown above.
+It uses scikit-learn's built-in handwritten-digits dataset: 1,797 flattened 8x8
+images, with pixel values from 0 to 16 and labels from 0 to 9. This is a small
+digits dataset, not the full MNIST dataset. Pixel values are scaled to [0, 1],
+then a stratified 80/20 train/test split is used. The script prints accuracy on
+the held-out test split; `--seed` defaults to 42 for a reproducible split and
+training run. `--epochs` and `--learning-rate` can be used to adjust training.
+With the default settings and seed 42, the example achieved **98.06% accuracy**
+on the 360-image test split. This is a single holdout result, not a
+cross-validation score.
 
 The example scripts generate plots in `outputs/graphs/`:
 
 - `regression.py` trains a network to approximate a target function.
 - `parity.py` trains a noisy parity-style classifier and visualizes the decision boundary.
-- `digits.py` trains a network to classify the 8x8 handwritten digits dataset and reports held-out accuracy.
+- `digits.py` trains a network to classify the 8x8 handwritten-digits dataset and reports held-out accuracy.
 
 ## Featured outputs
 
