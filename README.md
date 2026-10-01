@@ -51,6 +51,13 @@ python -m pip install --upgrade pip
 python -m pip install -e .
 ```
 
+To run the handwritten-digit example, install its optional dependency and run:
+
+```bash
+python -m pip install -e ".[examples]"
+python examples/digits.py
+```
+
 Dependencies:
 
 - `numpy`
@@ -132,6 +139,7 @@ The example scripts generate plots in `outputs/graphs/`:
 
 - `regression.py` trains a network to approximate a target function.
 - `parity.py` trains a noisy parity-style classifier and visualizes the decision boundary.
+- `digits.py` trains a network to classify the 8x8 handwritten digits dataset and reports held-out accuracy.
 
 ## Featured outputs
 
